@@ -169,17 +169,18 @@ func parseString(in []byte) (out, rest []byte, ok bool) {
 	return
 }
 
-// // ParseRawPrivateKey returns a private key from a PEM encoded private key. It
+// // ParsPrivateKey returns a private key from a PEM encoded private key. It
 // // supports RSA (PKCS#1), DSA (OpenSSL), and ECDSA private keys.
-func ParseRawPrivateKey(pemBytes []byte) (interface{}, error) {
+func ParsePrivateKey(pemBytes []byte, passphrase string) (interface{}, error) {
 	block, _ := pem.Decode(pemBytes)
+
 	if block == nil {
 		return nil, errors.New("ssh: no key found")
 	}
 
 	switch block.Type {
 	case "RSA PRIVATE KEY":
-		return x509.ParsePKCS1PrivateKey(block.Bytes)
+		return parseRSAPrivateKey(block, passphrase)
 	case "EC PRIVATE KEY":
 		return x509.ParseECPrivateKey(block.Bytes)
 		//	case "DSA PRIVATE KEY":

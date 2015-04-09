@@ -2,35 +2,45 @@ package sshcrypt
 
 import (
 	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"math/big"
 
 	"golang.org/x/crypto/ssh"
 )
 
-type RsaPublicKey rsa.PublicKey
+type RSAPublicKey rsa.PublicKey
 
-func (r *RsaPublicKey) GetSshPublicKey() *ssh.PublicKey {
+func (r *RSAPublicKey) GetSshPublicKey() *ssh.PublicKey {
 	var orig interface{} = r
 	pk := orig.(ssh.PublicKey)
 	return &pk
 }
 
-func (r *RsaPublicKey) GetCryptoPublicKey() *rsa.PublicKey {
-	var orig interface{} = r
-	pk := orig.(rsa.PublicKey)
+func (r *RSAPublicKey) GetCryptoPublicKey() *rsa.PublicKey {
+	pk := rsa.PublicKey(*r)
 	return &pk
 }
 
-func (r *RsaPublicKey) Type() string {
+func (pk *RSAPublicKey) toPEM() (string, error) {
+	key, err := x509.MarshalPKIXPublicKey(pk)
+	if err != nil {
+		return "", err
+	}
+	block := pem.Block{Type: "BEGIN PUBLIC KEY", Bytes: key}
+	return string(pem.EncodeToMemory(&block)), nil
+}
+
+func (r *RSAPublicKey) Type() string {
 	return ssh.KeyAlgoRSA
 }
 
-func (r *RsaPublicKey) Verify(data []byte, sig *ssh.Signature) error {
+func (r *RSAPublicKey) Verify(data []byte, sig *ssh.Signature) error {
 	return errors.New("not implemented")
 }
 
-func (r *RsaPublicKey) Marshal() []byte {
+func (r *RSAPublicKey) Marshal() []byte {
 	e := new(big.Int).SetInt64(int64(r.E))
 	wirekey := struct {
 		Name string
@@ -45,7 +55,7 @@ func (r *RsaPublicKey) Marshal() []byte {
 }
 
 // parseRSA parses an RSA key according to RFC 4253, section 6.6.
-func parseRSA(in []byte) (out *RsaPublicKey, rest []byte, err error) {
+func parseRSA(in []byte) (out *RSAPublicKey, rest []byte, err error) {
 	var w struct {
 		E    *big.Int
 		N    *big.Int
@@ -63,10 +73,25 @@ func parseRSA(in []byte) (out *RsaPublicKey, rest []byte, err error) {
 		return nil, nil, errors.New("ssh: incorrect exponent")
 	}
 
-	var key RsaPublicKey
+	var key RSAPublicKey
 	key.E = int(e)
 	key.N = w.N
-	return (*RsaPublicKey)(&key), w.Rest, nil
+	return (*RSAPublicKey)(&key), w.Rest, nil
 }
 
-type rsaPrivateKey rsa.PrivateKey
+func parseRSAPrivateKey(block *pem.Block, passphrase string) (*rsa.PrivateKey, error) {
+	var privateBytes []byte
+	var err error
+
+	if passphrase != "" {
+		privateBytes, err = x509.DecryptPEMBlock(block, []byte(passphrase))
+
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		privateBytes = block.Bytes
+	}
+
+	return x509.ParsePKCS1PrivateKey(privateBytes)
+}
