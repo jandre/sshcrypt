@@ -12,6 +12,14 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type PrivateKey interface {
+	DecryptBytes(ciphertext []byte) ([]byte, error)
+}
+
+type PublicKey interface {
+	EncryptBytes(ciphertext []byte) ([]byte, error)
+}
+
 func parsePubKey(in []byte, algo string) (pubKey interface{}, rest []byte, err error) {
 	switch algo {
 	case ssh.KeyAlgoRSA:

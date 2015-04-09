@@ -134,8 +134,6 @@ func TestEncryptionHelpers(t *testing.T) {
 		t.Fatal("Failed to decrypt message %v", err)
 	}
 
-	// t.Log("Decrypted is", string(decrypted))
-
 	if string(decrypted) != msg {
 		t.Fatal("does not match:", string(decrypted), msg)
 	}
