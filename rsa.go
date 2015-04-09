@@ -8,23 +8,24 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// MarshalAuthorizedKey serializes key for inclusion in an OpenSSH
-// authorized_keys file. The return value ends with newline.
-// func MarshalAuthorizedKey(key PublicKey) []byte {
-// b := &bytes.Buffer{}
-// b.WriteString(key.Type())
-// b.WriteByte(' ')
-// e := base64.NewEncoder(base64.StdEncoding, b)
-// e.Write(key.Marshal())
-// e.Close()
-// b.WriteByte('\n')
-// return b.Bytes()
-// }
-
 type rsaPublicKey rsa.PublicKey
 
 func (r *rsaPublicKey) Type() string {
-	return "ssh-rsa"
+	return ssh.KeyAlgoRSA
+}
+
+func (r *rsaPublicKey) Marshal() []byte {
+	e := new(big.Int).SetInt64(int64(r.E))
+	wirekey := struct {
+		Name string
+		E    *big.Int
+		N    *big.Int
+	}{
+		ssh.KeyAlgoRSA,
+		e,
+		r.N,
+	}
+	return ssh.Marshal(&wirekey)
 }
 
 // parseRSA parses an RSA key according to RFC 4253, section 6.6.
