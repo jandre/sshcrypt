@@ -10,8 +10,18 @@ import (
 
 type RsaPublicKey rsa.PublicKey
 
+func (r *RsaPublicKey) GetSshPublicKey() *ssh.PublicKey {
+	var orig interface{} = r
+	pk := orig.(ssh.PublicKey)
+	return &pk
+}
+
 func (r *RsaPublicKey) Type() string {
 	return ssh.KeyAlgoRSA
+}
+
+func (r *RsaPublicKey) Verify(data []byte, sig *ssh.Signature) error {
+	return errors.New("not implemented")
 }
 
 func (r *RsaPublicKey) Marshal() []byte {
