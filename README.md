@@ -14,6 +14,6 @@ TODO
 
 ## TODO
 
- [ ] Support non-RSA keys
- [ ] Add examples
- [ ] Expose Marshal methods (same way ssh.PublicKey does)
+ * [ ] Support non-RSA keys
+ * [ ] Add examples
+ * [ ] Expose Marshal methods (same way ssh.PublicKey does)
