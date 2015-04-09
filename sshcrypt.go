@@ -191,13 +191,6 @@ func ParseRawPrivateKey(pemBytes []byte) (interface{}, error) {
 
 // MarshalAuthorizedKey serializes key for inclusion in an OpenSSH
 // authorized_keys file. The return value ends with newline.
-// func MarshalAuthorizedKey(key ssh.PublicKey) []byte {
-// b := &bytes.Buffer{}
-// b.WriteString(key.Type())
-// b.WriteByte(' ')
-// e := base64.NewEncoder(base64.StdEncoding, b)
-// e.Write(key.Marshal())
-// e.Close()
-// b.WriteByte('\n')
-// return b.Bytes()
-// }
+func MarshalAuthorizedKey(key ssh.PublicKey) []byte {
+	return ssh.MarshalAuthorizedKey(key)
+}
