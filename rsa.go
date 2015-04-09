@@ -16,6 +16,12 @@ func (r *RsaPublicKey) GetSshPublicKey() *ssh.PublicKey {
 	return &pk
 }
 
+func (r *RsaPublicKey) GetCryptoPublicKey() *rsa.PublicKey {
+	var orig interface{} = r
+	pk := orig.(rsa.PublicKey)
+	return &pk
+}
+
 func (r *RsaPublicKey) Type() string {
 	return ssh.KeyAlgoRSA
 }
