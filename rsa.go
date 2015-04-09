@@ -1,7 +1,9 @@
 package sshcrypt
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
@@ -10,7 +12,22 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type RSAPrivateKey rsa.PrivateKey
+
+func (r *RSAPrivateKey) DecryptBytes(ciphertext []byte) ([]byte, error) {
+	sha1 := sha1.New()
+	priv := rsa.PrivateKey(*r)
+	return rsa.DecryptOAEP(sha1, rand.Reader, &priv, ciphertext, nil)
+}
+
 type RSAPublicKey rsa.PublicKey
+
+func (r *RSAPublicKey) EncryptBytes(in []byte) ([]byte, error) {
+	sha1 := sha1.New()
+	pubKey := r.GetCryptoPublicKey()
+	return rsa.EncryptOAEP(sha1, rand.Reader, pubKey, in, nil)
+
+}
 
 func (r *RSAPublicKey) GetSshPublicKey() *ssh.PublicKey {
 	var orig interface{} = r
@@ -79,7 +96,7 @@ func parseRSA(in []byte) (out *RSAPublicKey, rest []byte, err error) {
 	return (*RSAPublicKey)(&key), w.Rest, nil
 }
 
-func parseRSAPrivateKey(block *pem.Block, passphrase string) (*rsa.PrivateKey, error) {
+func parseRSAPrivateKey(block *pem.Block, passphrase string) (*RSAPrivateKey, error) {
 	var privateBytes []byte
 	var err error
 
@@ -93,5 +110,10 @@ func parseRSAPrivateKey(block *pem.Block, passphrase string) (*rsa.PrivateKey, e
 		privateBytes = block.Bytes
 	}
 
-	return x509.ParsePKCS1PrivateKey(privateBytes)
+	if key, err := x509.ParsePKCS1PrivateKey(privateBytes); err != nil {
+		return nil, err
+	} else {
+		result := RSAPrivateKey(*key)
+		return &result, nil
+	}
 }

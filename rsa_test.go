@@ -63,7 +63,7 @@ func TestEncryption(t *testing.T) {
 
 	pub, _, _, _, err := ParseAuthorizedKey([]byte(PUBLIC_KEY))
 
-	pk := pub.(*RsaPublicKey)
+	pk := pub.(*RSAPublicKey)
 	pubKey := pk.GetCryptoPublicKey()
 
 	if err != nil {
@@ -86,9 +86,49 @@ func TestEncryption(t *testing.T) {
 		t.Fatal("Failed to encrypt message %v", err)
 	}
 
-	priv := privKey.(*rsa.PrivateKey)
+	priv := rsa.PrivateKey(*privKey.(*RSAPrivateKey))
 
-	decrypted, err := rsa.DecryptOAEP(sha1, rand.Reader, priv, ciphertext, nil)
+	decrypted, err := rsa.DecryptOAEP(sha1, rand.Reader, &priv, ciphertext, nil)
+
+	if err != nil {
+		t.Fatal("Failed to decrypt message %v", err)
+	}
+
+	// t.Log("Decrypted is", string(decrypted))
+
+	if string(decrypted) != msg {
+		t.Fatal("does not match:", string(decrypted), msg)
+	}
+
+}
+
+func TestEncryptionHelpers(t *testing.T) {
+
+	pub, _, _, _, err := ParseAuthorizedKey([]byte(PUBLIC_KEY))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pk := pub.(*RSAPublicKey)
+
+	privKey, err := ParsePrivateKey([]byte(PRIVATE_KEY), "")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msg := "hello, i'm encrypting a string wtih rsa"
+	in := []byte(msg)
+
+	ciphertext, err := pk.EncryptBytes(in)
+
+	if err != nil {
+		t.Fatal("Failed to encrypt message %v", err)
+	}
+
+	priv := privKey.(*RSAPrivateKey)
+
+	decrypted, err := priv.DecryptBytes(ciphertext)
 
 	if err != nil {
 		t.Fatal("Failed to decrypt message %v", err)
