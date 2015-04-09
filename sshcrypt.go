@@ -20,7 +20,7 @@ type PublicKey interface {
 	EncryptBytes(ciphertext []byte) ([]byte, error)
 }
 
-func parsePubKey(in []byte, algo string) (pubKey interface{}, rest []byte, err error) {
+func parsePubKey(in []byte, algo string) (pubKey PublicKey, rest []byte, err error) {
 	switch algo {
 	case ssh.KeyAlgoRSA:
 		return parseRSA(in)
@@ -40,7 +40,7 @@ func parsePubKey(in []byte, algo string) (pubKey interface{}, rest []byte, err e
 
 // ParseAuthorizedKeys parses a public key from an authorized_keys
 // file used in OpenSSH according to the sshd(8) manual page.
-func ParseAuthorizedKey(in []byte) (out interface{}, comment string, options []string, rest []byte, err error) {
+func ParseAuthorizedKey(in []byte) (out PublicKey, comment string, options []string, rest []byte, err error) {
 	for len(in) > 0 {
 		end := bytes.IndexByte(in, '\n')
 		if end != -1 {
@@ -124,7 +124,7 @@ func ParseAuthorizedKey(in []byte) (out interface{}, comment string, options []s
 // (see sshd(8) manual page) once the options and key type fields have been
 // removed.
 //
-func parseAuthorizedKey(in []byte) (out interface{}, comment string, err error) {
+func parseAuthorizedKey(in []byte) (out PublicKey, comment string, err error) {
 	in = bytes.TrimSpace(in)
 
 	i := bytes.IndexAny(in, " \t")
@@ -149,7 +149,7 @@ func parseAuthorizedKey(in []byte) (out interface{}, comment string, err error) 
 
 // ParsePublicKey parses an SSH public key formatted for use in
 // the SSH wire protocol according to RFC 4253, section 6.6.
-func ParsePublicKey(in []byte) (out interface{}, err error) {
+func ParsePublicKey(in []byte) (out PublicKey, err error) {
 	algo, in, ok := parseString(in)
 	if !ok {
 		return nil, errors.New("ssh: unable to read public key")
