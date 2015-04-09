@@ -57,6 +57,7 @@ func TestParsePrivateKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 }
 
 func TestEncryption(t *testing.T) {

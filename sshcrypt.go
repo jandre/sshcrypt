@@ -2,7 +2,6 @@ package sshcrypt
 
 import (
 	"bytes"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/pem"
@@ -179,7 +178,7 @@ func parseString(in []byte) (out, rest []byte, ok bool) {
 
 // // ParsPrivateKey returns a private key from a PEM encoded private key. It
 // // supports RSA (PKCS#1), DSA (OpenSSL), and ECDSA private keys.
-func ParsePrivateKey(pemBytes []byte, passphrase string) (interface{}, error) {
+func ParsePrivateKey(pemBytes []byte, passphrase string) (PrivateKey, error) {
 	block, _ := pem.Decode(pemBytes)
 
 	if block == nil {
@@ -189,10 +188,10 @@ func ParsePrivateKey(pemBytes []byte, passphrase string) (interface{}, error) {
 	switch block.Type {
 	case "RSA PRIVATE KEY":
 		return parseRSAPrivateKey(block, passphrase)
-	case "EC PRIVATE KEY":
-		return x509.ParseECPrivateKey(block.Bytes)
-		//	case "DSA PRIVATE KEY":
-		//		return ParseDSAPrivateKey(block.Bytes)
+	// case "EC PRIVATE KEY":
+	// return x509.ParseECPrivateKey(block.Bytes)
+	//	case "DSA PRIVATE KEY":
+	//		return ParseDSAPrivateKey(block.Bytes)
 	default:
 		return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
 	}
