@@ -8,13 +8,13 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type rsaPublicKey rsa.PublicKey
+type RsaPublicKey rsa.PublicKey
 
-func (r *rsaPublicKey) Type() string {
+func (r *RsaPublicKey) Type() string {
 	return ssh.KeyAlgoRSA
 }
 
-func (r *rsaPublicKey) Marshal() []byte {
+func (r *RsaPublicKey) Marshal() []byte {
 	e := new(big.Int).SetInt64(int64(r.E))
 	wirekey := struct {
 		Name string
@@ -29,7 +29,7 @@ func (r *rsaPublicKey) Marshal() []byte {
 }
 
 // parseRSA parses an RSA key according to RFC 4253, section 6.6.
-func parseRSA(in []byte) (out *rsaPublicKey, rest []byte, err error) {
+func parseRSA(in []byte) (out *RsaPublicKey, rest []byte, err error) {
 	var w struct {
 		E    *big.Int
 		N    *big.Int
@@ -47,10 +47,10 @@ func parseRSA(in []byte) (out *rsaPublicKey, rest []byte, err error) {
 		return nil, nil, errors.New("ssh: incorrect exponent")
 	}
 
-	var key rsaPublicKey
+	var key RsaPublicKey
 	key.E = int(e)
 	key.N = w.N
-	return (*rsaPublicKey)(&key), w.Rest, nil
+	return (*RsaPublicKey)(&key), w.Rest, nil
 }
 
 type rsaPrivateKey rsa.PrivateKey

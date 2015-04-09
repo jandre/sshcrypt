@@ -15,8 +15,7 @@ import (
 func parsePubKey(in []byte, algo string) (pubKey interface{}, rest []byte, err error) {
 	switch algo {
 	case ssh.KeyAlgoRSA:
-		k, rest, err := parseRSA(in)
-		return k, rest, err
+		return parseRSA(in)
 		// case KeyAlgoDSA:
 		// return parseDSA(in)
 		// case KeyAlgoECDSA256, KeyAlgoECDSA384, KeyAlgoECDSA521:
