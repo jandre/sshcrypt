@@ -9,3 +9,11 @@ Much of the code simply borrows and exposes private stuff in Google's Go crypto
 extensions and the TLS library.
 
 ## Example
+
+TODO
+
+## TODO
+
+ [ ] Support non-RSA keys
+ [ ] Add examples
+ [ ] Expose Marshal methods (same way ssh.PublicKey does)

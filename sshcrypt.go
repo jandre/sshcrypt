@@ -12,10 +12,12 @@ import (
 )
 
 type PrivateKey interface {
+	Type() string
 	DecryptBytes(ciphertext []byte) ([]byte, error)
 }
 
 type PublicKey interface {
+	Type() string
 	EncryptBytes(ciphertext []byte) ([]byte, error)
 }
 

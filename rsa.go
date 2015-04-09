@@ -20,6 +20,10 @@ func (r *RSAPrivateKey) DecryptBytes(ciphertext []byte) ([]byte, error) {
 	return rsa.DecryptOAEP(sha1, rand.Reader, &priv, ciphertext, nil)
 }
 
+func (r *RSAPrivateKey) Type() string {
+	return ssh.KeyAlgoRSA
+}
+
 type RSAPublicKey rsa.PublicKey
 
 func (r *RSAPublicKey) EncryptBytes(in []byte) ([]byte, error) {
